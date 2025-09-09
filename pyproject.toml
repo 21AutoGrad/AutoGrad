@@ -1,0 +1,19 @@
+# pyproject.toml
+[project]
+name = "autograd"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+  "pydantic>=2.6",
+  "fastapi>=0.111",
+  "uvicorn[standard]>=0.30",
+  "docker>=7.0",                 # for sandbox executor (optional)
+  "sentence-transformers>=3.0",  # embeddings
+  "scikit-learn>=1.4",           # MLP/LogReg head
+  "numpy>=1.26", "pandas>=2.2",
+  "tiktoken>=0.7",               # token accounting (optional)
+  "python-dotenv>=1.0",
+  # pick ONE LLM provider you have access to:
+  "groq>=0.9",       # if you’ll call Groq Llama models
+  # "openai>=1.40",  # or OpenAI if available
+]

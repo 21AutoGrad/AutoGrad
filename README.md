@@ -1,3 +1,14 @@
+---
+title: Pseudoscorex Backend
+emoji: 📝
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+short_description: Flask API for criterion-wise rubric scoring
+---
+
 # Pseudoscore-X Flask Backend
 
 HTTP API wrapping the **Criterion-Wise Neural-LLM Hybrid Grading System (v4)**

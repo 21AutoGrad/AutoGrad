@@ -26,6 +26,14 @@ logger = logging.getLogger("inference")
 
 # ── Config (overridable via env vars) ──────────────────────────────────────
 CHECKPOINT_PATH = os.getenv("CHECKPOINT_PATH", "best_model_v5.pt")
+
+# Optional: pull the checkpoint from a Hugging Face Hub model repo at boot.
+# Useful for deployments where you don't want the .pt baked into the git repo.
+# If set, takes precedence over CHECKPOINT_PATH.
+CHECKPOINT_HF_REPO = os.getenv("CHECKPOINT_HF_REPO", "").strip()
+CHECKPOINT_HF_FILENAME = os.getenv("CHECKPOINT_HF_FILENAME", "best_model_v5.pt")
+CHECKPOINT_HF_REVISION = os.getenv("CHECKPOINT_HF_REVISION", "main")
+
 EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", "1024"))
 N_HEADS = int(os.getenv("N_HEADS", "8"))
 N_CROSS_LAYERS = int(os.getenv("N_CROSS_LAYERS", "2"))
@@ -35,6 +43,46 @@ DEVICE = os.getenv("DEVICE", "cuda" if torch.cuda.is_available() else "cpu")
 # ── Module-level singletons (initialised by load_pipeline) ─────────────────
 _model = None
 _device = None
+
+
+def _resolve_checkpoint_path() -> str:
+    """
+    Return a local filesystem path to the checkpoint, downloading from the
+    Hugging Face Hub if CHECKPOINT_HF_REPO is set. Otherwise falls back to
+    the local CHECKPOINT_PATH.
+
+    huggingface_hub caches by content hash under ~/.cache/huggingface/hub,
+    so repeated boots inside the same container don't re-download.
+    """
+    if CHECKPOINT_HF_REPO:
+        # Lazy import: only needed when the env var is actually set, so local
+        # dev (with the .pt sitting next to app.py) doesn't pay the import cost.
+        from huggingface_hub import hf_hub_download
+        token = os.getenv("HF_TOKEN") or None
+        logger.info(
+            "Downloading checkpoint from HF Hub: repo=%s file=%s rev=%s",
+            CHECKPOINT_HF_REPO, CHECKPOINT_HF_FILENAME, CHECKPOINT_HF_REVISION,
+        )
+        t0 = time.perf_counter()
+        path = hf_hub_download(
+            repo_id=CHECKPOINT_HF_REPO,
+            filename=CHECKPOINT_HF_FILENAME,
+            revision=CHECKPOINT_HF_REVISION,
+            token=token,
+        )
+        logger.info(
+            "Checkpoint ready at %s (fetch/cache took %.1fs)",
+            path, time.perf_counter() - t0,
+        )
+        return path
+
+    if not os.path.exists(CHECKPOINT_PATH):
+        raise FileNotFoundError(
+            f"Checkpoint not found at '{CHECKPOINT_PATH}' and CHECKPOINT_HF_REPO is unset. "
+            f"Either place best_model_v5.pt in the project root, set CHECKPOINT_PATH, "
+            f"or set CHECKPOINT_HF_REPO to a HF model repo (e.g. 'user/pseudoscorex-checkpoint')."
+        )
+    return CHECKPOINT_PATH
 
 
 def load_pipeline():
@@ -55,14 +103,9 @@ def load_pipeline():
         dropout=0.1,
     ).to(device)
 
-    if not os.path.exists(CHECKPOINT_PATH):
-        raise FileNotFoundError(
-            f"Checkpoint not found at '{CHECKPOINT_PATH}'. "
-            f"Set CHECKPOINT_PATH env var or place best_model_v5.pt in the project root."
-        )
-
-    logger.info("Loading checkpoint: %s", CHECKPOINT_PATH)
-    state_dict = torch.load(CHECKPOINT_PATH, map_location=device)
+    checkpoint_path = _resolve_checkpoint_path()
+    logger.info("Loading checkpoint: %s", checkpoint_path)
+    state_dict = torch.load(checkpoint_path, map_location=device)
     model.load_state_dict(state_dict)
     model.eval()
 

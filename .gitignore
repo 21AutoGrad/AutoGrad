@@ -24,6 +24,7 @@ Thumbs.db
 # The encoder Space lives in its own HF repo — exclude from the backend repo
 hf_space_encoder/
 
-# Local model checkpoints (tracked via Git LFS — see .gitattributes)
-# Comment this line out if you do want best_model_v5.pt in git
-# best_model_v5.pt
+# Local model checkpoints — hosted on HF Hub, downloaded at runtime.
+# Keep the file out of git so the repo stays small.
+best_model_v5.pt
+*.pt

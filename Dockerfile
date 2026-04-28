@@ -13,5 +13,6 @@ COPY . .
 ENV PORT=8000
 EXPOSE 8000
 
-CMD ["gunicorn", "--preload", "--workers", "1", "--threads", "4", \
-     "--timeout", "120", "--bind", "0.0.0.0:8000", "app:app"]
+# Use sh -c so ${PORT} expands at runtime — Render injects PORT=10000
+# and other platforms (Railway, Fly) do similar. Falls back to 8000 locally.
+CMD ["sh", "-c", "gunicorn --preload --workers 1 --threads 4 --timeout 120 --bind 0.0.0.0:${PORT:-8000} app:app"]

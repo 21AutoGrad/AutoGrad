@@ -1,0 +1,22 @@
+# Server-side requirements only.
+# The CodeT5 encoder lives in a HF Space; Qwen lives behind the HF Inference
+# API. Neither transformers nor sentencepiece is needed on this server.
+
+# Torch — CPU build is enough for the small CriterionWiseScoringSystem head.
+# On Render/Railway, install the CPU wheel explicitly to keep the image small:
+#   pip install torch==2.3.1 --index-url https://download.pytorch.org/whl/cpu
+torch>=2.0,<3.0
+
+# Web server
+flask>=3.0
+gunicorn>=21.0
+
+# Clients for the encoder Space + HF Inference API.
+# `gradio_client` handles Gradio 4.x's queued endpoints; `huggingface_hub`
+# wraps the OpenAI-compatible chat-completions router.
+gradio_client>=1.3
+huggingface_hub>=0.24
+requests>=2.31
+
+# Misc
+numpy

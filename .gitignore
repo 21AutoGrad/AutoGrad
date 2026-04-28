@@ -1,0 +1,29 @@
+# Secrets — never commit
+.env
+.env.local
+*.key
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual envs
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+
+# OneDrive / Windows clutter
+desktop.ini
+Thumbs.db
+*.tmp
+
+# The encoder Space lives in its own HF repo — exclude from the backend repo
+hf_space_encoder/
+
+# Local model checkpoints (tracked via Git LFS — see .gitattributes)
+# Comment this line out if you do want best_model_v5.pt in git
+# best_model_v5.pt

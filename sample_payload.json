@@ -1,0 +1,28 @@
+{
+  "question": "Jordan has a list of unique projected car prices for the next several years. He needs to purchase the car in one year and sell it in another at a lower price. Jordan's goal is to keep the financial loss as small as possible.\n\nExample:\nprice = [20, 15, 8, 2, 12]\nHis minimum loss is incurred by purchasing in year 2 at price[1] = 15 and reselling in year 5 at price[4] = 12. Return 15 - 12 = 3.\n\nFunction Description: Complete the smartCarTrade function.\nParameters: int prices[n] — a list of car prices for consecutive years.\nReturns: int — the minimum loss Jordan can make.\n\nConstraints:\n2 <= n <= 2 * 10^5\n1 <= price[i] <= 10^16\nAll prices are distinct. A valid answer exists.\n\nSample Input 0:\n3\n5 10 3\nSample Output 0:\n2\n\nSample Input 1:\n5\n20 7 8 2 5\nSample Output 1:\n2",
+
+  "answer": "FUNCTION GBFS_PATH(adj, names, tone, start_idx, exit_idx):\n    CREATE priority queue PQ\n    CREATE list PARENT of size N, initialized to -1\n    CREATE empty set VISITED\n\n    PUSH (tone[start_idx], names[start_idx], start_idx) into PQ\n\n    WHILE PQ is not empty:\n        POP (curr_tone, curr_name, u) from PQ\n        IF u is in VISITED:\n            CONTINUE\n        ADD u to VISITED\n\n        IF u == exit_idx:\n            CREATE empty list PATH\n            WHILE u != -1:\n                APPEND names[u] to PATH\n                u = PARENT[u]\n            REVERSE PATH\n            RETURN PATH\n\n        FOR each neighbor v in adj[u]:\n            IF v not in VISITED:\n                PARENT[v] = u\n                PUSH (tone[v], names[v], v) into PQ\n\n    RETURN NULL  // No path found",
+
+  "criteria": [
+    {
+      "name": "Core Algorithm Logic",
+      "max_score": 4,
+      "description": "Core Algorithm Logic (4 marks). Student applies the correct method: pair each price with its original year index; sort prices in descending order (or ascending with correct neighbor logic); compare adjacent sorted values to compute valid losses only when the purchase year < selling year; track the minimum valid loss. 4 marks: fully correct sorting-based logic with year check. 3 marks: mostly correct; minor logical inconsistency or missing detail. 2 marks: sorting present but incorrect handling of year ordering or neighbor computation. 1 mark: attempt made but solution fundamentally flawed. 0 marks: no relevant logic."
+    },
+    {
+      "name": "Efficiency and Constraints Handling",
+      "max_score": 2,
+      "description": "Efficiency & Constraints Handling (2 marks). Proposed design respects constraints: O(n log n) sorting plus O(n) scan. No nested double loops leading to O(n^2) for large n. Recognizes that price values may be large integers (up to 10^16). 2 marks: efficient and scalable. 1 mark: minor inefficiencies but workable. 0 marks: inefficient solution (e.g., checking every pair)."
+    },
+    {
+      "name": "Edge Case Consideration",
+      "max_score": 2,
+      "description": "Edge Case Consideration (2 marks). Shows awareness of special/edge scenarios: already-minimal loss appearing early or late in array; closest price difference not valid if the selling year precedes the buying year (must skip); n >= 2 is guaranteed but the check is at least implied. 1 mark: edge cases logically handled. 0 marks: no edge case consideration. (Treat as binary at the 1-mark threshold; award 2 only when multiple edge cases are explicitly handled.)"
+    },
+    {
+      "name": "Clarity, Structure and Output",
+      "max_score": 2,
+      "description": "Clarity, Structure & Correct Output Representation (2 marks). Pseudocode is structured, readable, and returns the right output as an integer. Variables named meaningfully (e.g., minLoss, sortedPrices); steps follow a logical order; final return/print is clear. 2 marks: clear and correct. 1 mark: understandable but messy or unclear return. 0 marks: confusing or missing output."
+    }
+  ]
+}
